@@ -1,0 +1,24 @@
+language: go
+sudo: false
+before_install:
+- go get github.com/mitchellh/gox
+install:
+- #skip
+script:
+- go get -t -v ./...
+- diff -u <(echo -n) <(gofmt -d .)
+- go test -v -race ./...
+- gox -os="linux darwin windows" -arch="amd64" -output="bin/go-secretmanager_{{.OS}}_{{.Arch}}" -ldflags "-X
+  main.Rev=`git rev-parse --short HEAD`" -verbose ./...
+deploy:
+  provider: releases
+  skip_cleanup: true
+  api_key:
+    secure: tT10ec+FK0RS6U7U6NVeIEVV1UzaqNodI8CVzyLCMLP30g88Tjj2VWERno9lt7Rk2FwcwTEkwdNemRguc8I7mOOomDj229ZwFIlpirq2PwFLte/bT+kaRZlLImBSvQKmQVvzuEZhuoarakF6tGY4V0tvUXPZnCSiWCo0CH6yJgOcBDqhB/Yx9A4jQy04/2EBP7sT6eez3i7W/plqNzdc8Zgzabhok3wgYax6NapHOQKooRsbMh8axr97+oPAupGZ0nhT4QZdjCE7b5RbENGiV37Jy9x92sVjl52QkyURQImYw0MiuyrJQcanG3B/DF+rBHtp7LuAbG/OjEdjrU0kqN9gsnGuj+wwBurXs4PGf4LTeOPEK4xNFTW/xfHF4j+5BWUlAXeJ4+aUFJZjKVn7p9wXHBUK+cx1Tdlc4O0mzp0MqW2jnrFw9EKx1KN7rBAe41AO/yp7yziiCk9Nnf+AZ5fJ8ffd3zonnmaxGd51ieWPgRZOFaEx+jmglpBJAFoeEmC4M8flSPgC2JQ9qbwBKUSapbx/wGL1TBkZx0UIy9cQVZ2kL1Yjd22LSPdaAgqWY4p6/0YJEwHra6pTC+74d7hBoadFlsZgOMVMGlI4c6LdJQhhbZ1nLJYDQ86+TiOlQ/QEJeTuDIWP4S9WgVmcMWXxjVY77uPLNaS+9lGRbpY=
+  file:
+    - "bin/go-secretmanager_windows_amd64.exe"
+    - "bin/go-secretmanager_linux_amd64"
+    - "bin/go-secretmanager_darwin_amd64"
+  on:
+    repo: enderv/go-secretmanager
+    tags: true
