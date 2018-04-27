@@ -94,9 +94,15 @@ func checkProfileExists(credFile *string, profileName *string) (bool, error) {
 
 func getSecret(sess *session.Session, secretName *string, secretVersion *string) {
 	svc := secretsmanager.New(sess)
+	var versionID string
+	if *secretVersion == "version" {
+		versionID = "AWSCURRENT"
+	} else {
+		versionID = *secretVersion
+	}
 	input := &secretsmanager.GetSecretValueInput{
-		SecretId:     aws.String("MyTestDatabaseSecret"),
-		VersionStage: aws.String("AWSPREVIOUS"),
+		SecretId:     aws.String(*secretName),
+		VersionStage: aws.String(versionID),
 	}
 
 	result, err := svc.GetSecretValue(input)
