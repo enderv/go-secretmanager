@@ -2,6 +2,7 @@ package main
 
 import (
 	"bufio"
+	"encoding/json"
 	"errors"
 	"flag"
 	"fmt"
@@ -22,19 +23,28 @@ func main() {
 	sourceProfile := flag.String("p", "default", "Profile to use")
 	secret := flag.String("s", "secret", "Secret To Fetch")
 	version := flag.String("v", "version", "Version of secret To Fetch")
+	skipProfile := flag.Bool("k", false, "Skip profile check and just use default for use when no cred file and default will work")
 	credFile := flag.String("c", filepath.Join(getCredentialPath(), ".aws", "credentials"), "Full path to credentials file")
 	flag.Parse()
 	if *secret == "secret" {
 		fmt.Println("You must specify a secret name to fetch")
 		return
 	}
-	//Get Current Credentials
-	exists, err := checkProfileExists(credFile, sourceProfile)
-	if err != nil || !exists {
-		fmt.Println(err.Error())
-		return
+
+	var sess *session.Session
+	if *skipProfile {
+		//Use Default Credentials
+		sess = session.Must(session.NewSession())
+	} else {
+		//Get Specified Credentials
+		exists, err := checkProfileExists(credFile, sourceProfile)
+		if err != nil || !exists {
+			fmt.Println(err.Error())
+			return
+		}
+		sess = CreateSession(sourceProfile)
 	}
-	sess := CreateSession(sourceProfile)
+
 	getSecret(sess, secret, version)
 }
 
@@ -130,5 +140,10 @@ func getSecret(sess *session.Session, secretName *string, secretVersion *string)
 		return
 	}
 
-	fmt.Println(result.SecretString)
+	// Convert structs to JSON.
+	data, err := json.Marshal(result)
+	if err != nil {
+		log.Fatal(err)
+	}
+	fmt.Printf("%s\n", data)
 }
