@@ -1,16 +1,12 @@
 package main
 
 import (
-	"bufio"
 	"encoding/json"
-	"errors"
 	"flag"
 	"fmt"
 	"log"
-	"os"
 	"os/user"
 	"path/filepath"
-	"strings"
 
 	"github.com/alyu/configparser"
 	"github.com/aws/aws-sdk-go/aws"
@@ -46,19 +42,6 @@ func main() {
 	}
 
 	getSecret(sess, secret, version)
-}
-
-// getMFACode prompts for MFA Token input
-// It returns the value as a string and any error
-func getMFACode() (string, error) {
-	var mfa string
-	fmt.Print("Enter MFA Token: ")
-	reader := bufio.NewReader(os.Stdin)
-	mfa, err := reader.ReadString('\n')
-	if err != nil {
-		return mfa, errors.New("failed to get token")
-	}
-	return strings.TrimSpace(mfa), nil
 }
 
 // CreateSession Creates AWS Session with specified profile
